@@ -18,8 +18,6 @@
  ;; If there is more than one, they won't work right.
  '(default ((t (:family "Iosevka Fixed" :foundry "outline" :slant normal :weight normal :height 120 :width normal)))))
 
-;; Luis's Emacs Configuration File.
-
 ;; Disable the back-up feature.
 (setq make-backup-files nil)
 
