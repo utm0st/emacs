@@ -7,17 +7,8 @@
 ;; Show lines of code.
 (global-set-key (kbd "<f12>") 'global-display-line-numbers-mode)
 
-;; Compilation.
-(global-set-key (kbd "<f8>") 'compile)
-
-;; Startup emacs loading my config.
-(find-file "~/.config/emacs/init.el")
-
 ;; Enable this to navigate by words that follow the camelCase notation.
 (global-subword-mode t)
-
-;; Update buffer.
-(global-set-key (kbd "<f5>") 'revert-buffer)
 
 ;; Disable back-ups.
 (setq make-backup-files nil)
@@ -45,12 +36,6 @@
 (set-face-attribute 'fixed-pitch nil :font "Iosevka" :height efs/default-font-size)
 ;; Set the variable pitch face
 (set-face-attribute 'variable-pitch nil :font "Iosevka" :height efs/default-variable-font-size :weight 'regular)
-
-;; Styles.
-(setq c-default-style
-      '((c-mode . "k&r")
-        (c++-mode . "stroustrup")
-        (other . "linux")))
 
 ;; Expand.
 (global-set-key (kbd "C-'") 'dabbrev-expand)
@@ -91,9 +76,6 @@
 (unless (package-installed-p 'use-package)
   (package-install 'use-package))
 
-;; For multiple parentheses.
-(electric-pair-mode t)
-
 (require 'use-package)
 (setq use-package-always-ensure t)
 
@@ -107,14 +89,10 @@
   (auto-package-update-maybe)
   (auto-package-update-at-time "09:00"))
 
-;; Needed before using ivy.
-(use-package swiper :ensure t)
-
 ;; Completion framework.
 (use-package ivy
   :diminish
-  :bind (("C-s" . swiper)
-         :map ivy-minibuffer-map
+  :bind (:map ivy-minibuffer-map
          ("TAB" . ivy-alt-done)
          ("C-l" . ivy-alt-done)
          ("C-n" . ivy-next-line)
@@ -128,33 +106,6 @@
          ("C-d" . ivy-reverse-i-search-kill))
   :config
   (ivy-mode 1))
-
-;; Needed to show icons on doom-modeline.
-(use-package all-the-icons
-  :ensure t)
-
-(use-package doom-modeline
-  :ensure t
-  :init (doom-modeline-mode 1)
-  :custom ((doom-modeline-height 15)))
-
-(use-package doom-themes
-  :ensure t
-  :config
-  ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-outrun-electric t)
-
-  ;; Enable flashing mode-line on errors
-  (doom-themes-visual-bell-config)
-  ;; Enable custom neotree theme (all-the-icons must be installed!)
-  (doom-themes-neotree-config)
-  ;; or for treemacs users
-  (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
-  (doom-themes-treemacs-config)
-  ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config))
 
 ;; Disable line numbers for some modes
 (dolist (mode '(org-mode-hook
@@ -188,15 +139,33 @@
   :init
   (ivy-rich-mode 1))
 
-;; Hydra is helpful to repeat commands.
-(use-package hydra
-  :defer t)
+(use-package go-mode
+  :init)
 
-(defhydra hydra-text-scale (:timeout 4)
-  "scale text"
-  ("j" text-scale-increase "in")
-  ("k" text-scale-decrease "out")
-  ("f" nil "finished" :exit t))
+(use-package clang-format
+  :init)
+
+(defun efs/lsp-mode-setup ()
+  (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+  (lsp-headerline-breadcrumb-mode))
+
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :init
+  (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l
+  :hook (lsp-mode . efs/lsp-mode-setup)
+  (lsp-enable-which-key-integration t))
+
+(add-hook 'c-mode-hook 'lsp)
+(add-hook 'c++-mode-hook 'lsp)
+
+(use-package lsp-ui
+  :hook (lsp-mode . lsp-ui-mode)
+  :custom
+  (lsp-ui-doc-position 'bottom))
+
+(with-eval-after-load 'lsp-mode
+  (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))
 
 (use-package projectile
   :diminish projectile-mode
@@ -219,58 +188,216 @@
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
-(defun efs/lsp-mode-setup ()
-  (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-  (lsp-headerline-breadcrumb-mode))
-
-(use-package lsp-mode
-  :commands (lsp lsp-deferred)
-  :init
-  (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l
-  :hook (lsp-mode . efs/lsp-mode-setup)
-  (lsp-enable-which-key-integration t))
-
 (use-package eglot
   :init
   :config
   (add-to-list 'eglot-server-programs '((c++-mode c-mode) "clangd")))
 
-(add-hook 'c-mode-hook 'lsp)
-(add-hook 'c++-mode-hook 'lsp)
-
-(use-package lsp-ui
-  :hook (lsp-mode . lsp-ui-mode)
-  :custom
-  (lsp-ui-doc-position 'bottom))
-
-(use-package lsp-treemacs
-  :after lsp)
-
-(use-package lsp-ivy
-  :after lsp)
-
-(use-package company
-  :after lsp-mode
-  :hook (lsp-mode . company-mode)
-  :bind (:map company-active-map
-         ("<tab>" . company-complete-selection))
-        (:map lsp-mode-map
-         ("<tab>" . company-indent-or-complete-common))
-  :custom
-  (company-minimum-prefix-length 1)
-  (company-idle-delay 0.0))
+(use-package tree-sitter
+  :init)
 
 (use-package company-box
   :hook (company-mode . company-box-mode))
 
-(with-eval-after-load 'lsp-mode
-  (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))
+(defun jart-sudo (&optional path)
+  "Reopen PATH (or current file) with root privileges."
+  (interactive)
+  (find-alternate-file
+   (concat "/sudo:root@localhost:" (or path buffer-file-name))))
 
-(setq lsp-enable-indentation nil)
+(defun jart-unfill-paragraph ()
+  "Take a multi-line paragraph and make it into a single line.
+
+Thanks: Stefan Monnier <foo@acm.org>"
+  (interactive)
+  (let ((fill-column (point-max)))
+    (fill-paragraph nil)))
+
+(defun jart-cleanup-buffer ()
+  "Perform a bunch of operations on the whitespace content of a buffer."
+  (interactive)
+  (indent-region (point-min) (point-max))
+  (untabify (point-min) (point-max))
+  (delete-trailing-whitespace))
+
+(defun jart-isearch-show-all-matches ()
+  "Shows grep results during a C-s search."
+  (interactive)
+  (let ((case-fold-search isearch-case-fold-search))
+    (occur (if isearch-regexp isearch-string
+             (regexp-quote isearch-string)))))
+
+(defun jart-paredit-close-parenthesis ()
+  "Reliably insert closing parenthesis."
+  (interactive)
+  (let ((p (point)))
+    (condition-case nil
+        (paredit-close-parenthesis)
+      ('error
+       (insert ")")
+       (jart-show-note "unbalanced")))
+    (goto-char (+ p 1))))
+
+(defun jart-note ()
+  "Open a new note entry in my notes file."
+  (interactive)
+  (find-file "~/notes.org")
+  (goto-char (point-min))
+  (org-insert-heading)
+  (insert (concat "<" (format-time-string "%Y-%m-%dT%H:%M:%S%z") "> ")))
+
+(defun jart-sort-at-point ()
+  "Sort lines under cursor."
+  (interactive)
+  (or (jart-sort-list-at-point)
+      (jart-sort-block-at-point)))
+
+(defun jart-sane-forward-paragraph ()
+  "Move to next blank line."
+  (interactive)
+  (jart-normal-paragraphs
+   (forward-paragraph)))
+
+(defun jart-sane-backward-paragraph ()
+  "Move to previous blank line."
+  (interactive)
+  (jart-normal-paragraphs
+   (backward-paragraph)))
+
+(defun jart-sane-} ()
+  "Insert } with correct indentation."
+  (interactive)
+  (insert "}")
+  (indent-for-tab-command))
+
+(defvar dotfiles-dir
+  (file-name-directory
+   (or (buffer-file-name) load-file-name))
+  "Location of Emacs configuration")
+
+(defun jart-save-word ()
+  "Adds word under cursor to personal dictionary."
+  (interactive)
+  (let* ((bounds (bounds-of-thing-at-point 'word))
+         (word (buffer-substring-no-properties (car bounds)
+                                               (cdr bounds))))
+    (ispell-send-string (concat "*" word "\n"))
+    (add-to-list 'ispell-buffer-session-localwords word)
+    (when (fboundp 'flyspell-unhighlight-at)
+      (flyspell-unhighlight-at (car bounds)))
+    (setq ispell-pdict-modified-p '(t))
+    (ispell-pdict-save t t)))
+
+(defun jart-pretty-lambdas ()
+  "Make lambda render with the unicode symbol."
+  (font-lock-add-keywords
+   nil `(("(?\\(lambda\\>\\)"
+          (0 (progn (compose-region (match-beginning 1) (match-end 1)
+                                    ,(make-char 'greek-iso8859-7 107))
+                    nil))))))
+
+(defun jart-remove-elc-on-save ()
+  "If you're saving an elisp file, likely the .elc is no longer valid."
+  (make-local-variable 'after-save-hook)
+  (add-hook 'after-save-hook
+            (lambda ()
+              (if (file-exists-p (concat buffer-file-name "c"))
+                  (delete-file (concat buffer-file-name "c"))))))
+
+(use-package markdown-mode
+  :ensure t
+  :mode ("README\\.md\\'" . gfm-mode)
+  :init (setq markdown-command "multimarkdown"))
+
+(use-package go-mode
+  :mode "\\.go\\'"
+  :hook (go-mode . lsp-deferred))
+
+(global-set-key (kbd "C-s") 'isearch-forward-regexp)
+(global-set-key (kbd "M-Q") 'jart-unfill-paragraph)
+(global-set-key (kbd "C-x M-m") 'shell)
+(global-set-key (kbd "C-r") 'isearch-backward-regexp)
+(global-set-key (kbd "C-M-s") 'isearch-forward)
+(global-set-key (kbd "C-M-r") 'isearch-backward)
+(global-set-key (kbd "C-c r") 'revert-buffer)
+(global-set-key (kbd "C-x C-r") 'replace-string)
+(global-set-key (kbd "C-x C-l") 'replace-regexp)
+(global-set-key (kbd "<f1>") 'man)
+(global-set-key (kbd "<f3>") 'jart-sudo)
+(global-set-key (kbd "<f5>") 'toggle-truncate-lines)
+(global-set-key (kbd "<f6>") 'gud-next)
+(global-set-key (kbd "C-<f6>") 'gud-nexti)
+(global-set-key (kbd "<f7>") 'gud-step)
+(global-set-key (kbd "C-<f7>") 'gud-stepi)
+(global-set-key (kbd "<f8>") 'gud-finish)
+(global-set-key (kbd "C-<f8>") 'gud-cont)
+(global-set-key (kbd "<f9>") 'gud-up)
+(global-set-key (kbd "C-<f9>") 'gud-down)
+(global-set-key (kbd "<f10>") 'compile)
+(global-set-key (kbd "C-<f10>") 'gdb)
+(global-set-key (kbd "C-c n") 'jart-cleanup-buffer)
+(global-set-key (kbd "C-x M-f") 'ido-find-file-other-window)
+(global-set-key (kbd "C-M-<tab>") 'clang-format-region)
+(global-set-key (kbd "C-c <tab>") 'clang-format-buffer)
+(global-set-key (kbd "C-c f") 'flyspell-buffer)
+(global-set-key (kbd "C-c a") 'jart-save-word)
+
+(add-to-list 'load-path (concat dotfiles-dir "lisp"))
+(add-to-list 'custom-theme-load-path (concat dotfiles-dir "themes"))
+
+(load-theme 'justine256 t)
+
+(prefer-coding-system 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+
+(setq-default
+ c-basic-offset 2
+ c-file-style nil
+ fill-column 72
+ indent-tabs-mode nil
+ tab-width 2
+ truncate-lines t)
+
+(defconst my-namespaces
+  '("cc-mode"
+    (c-offsets-alist . ((innamespace . [0])))))
+
+(c-add-style "my-namespaces" my-namespaces)
+
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+(auto-compression-mode t)
+(auto-fill-mode 1)
+(delete-selection-mode 1)
+(global-font-lock-mode t)
+(ido-mode t)
+(recentf-mode 1)
+(show-paren-mode 1)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Performance Enhancements
+
+;; Stop recursively searching parents when I open a file!
+(setq vc-handled-backends nil)
+(require 'files)
+(defun dir-locals-find-file (file)
+  "Do nothing with FILE."
+  nil)
+
+(require 'server)
+(when (not (server-running-p))
+  (server-start))
 
 (custom-set-variables
+ '(c-basic-offset 2 t)
+ '(custom-safe-themes
+   '("c0e8a59eb7d603ca4af5616b2c61b8be2fee031760af4d8c80fd2f21229ce462" default))
+ '(fill-column 72)
+ '(gdb-many-windows t)
  '(package-selected-packages
-   '(company-box company lsp-ivy lsp-treemacs lsp-ui lsp-mode magit counsel-projectile projectile hydra counsel ivy-rich which-key rainbow-delimiters doom-themes all-the-icons doom-modeline swiper auto-package-update ivy use-package)))
+   '(go-mode clang-format company-box company magit counsel-projectile projectile hydra counsel ivy-rich which-key rainbow-delimiters doom-themes all-the-icons doom-modeline swiper auto-package-update ivy use-package))
+ '(tab-width 2))
 (custom-set-faces)
 (put 'scroll-left 'disabled nil)
 (put 'upcase-region 'disabled nil)
