@@ -4,7 +4,7 @@
 (defvar efs/frame-transparency '(90 . 90))
 
 (set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
-(add-to-list 'default-frame-alist `(alpha . ,efs/frame-transparency))
+(add-to-list 'default-frame-alist `(alpha . efs/frame-transparency))
 (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
