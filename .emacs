@@ -1,26 +1,3 @@
-;; Move thru' windows.
-(global-set-key (kbd "M-S-<left>") 'windmove-left)
-(global-set-key (kbd "M-S-<right>") 'windmove-right)
-(global-set-key (kbd "M-S-<up>") 'windmove-up)
-(global-set-key (kbd "M-S-<down>") 'windmove-down)
-
-;; Show lines of code.
-(global-set-key (kbd "<f12>") 'global-display-line-numbers-mode)
-
-;; Enable this to navigate by words that follow the camelCase notation.
-(global-subword-mode t)
-
-;; Disable back-ups.
-(setq make-backup-files nil)
-
-;; Start-up.
-(setq inhibit-startup-screen t) ; Disable splash screen.
-(scroll-bar-mode -1)        ; Disable visible scrollbar
-(tool-bar-mode -1)          ; Disable the toolbar
-(tooltip-mode -1)           ; Disable tooltips
-(set-fringe-mode 10)        ; Give some breathing room
-(menu-bar-mode -1)          ; Disable the menu bar
-
 ;; Font-size and stuff.
 (defvar efs/default-font-size 140)
 (defvar efs/default-variable-font-size 140)
@@ -37,12 +14,6 @@
 ;; Set the variable pitch face
 (set-face-attribute 'variable-pitch nil :font "Iosevka" :height efs/default-variable-font-size :weight 'regular)
 
-;; Expand.
-(global-set-key (kbd "C-'") 'dabbrev-expand)
-
-;; Switch between .h and .cpp.
-(global-set-key (kbd "C-c o") 'ff-find-other-file)
-
 ;; Set up the visible bell
 (setq visible-bell t)
 
@@ -56,7 +27,7 @@
   (message "Emacs loaded in %s with %d garbage collections."
            (format "%.2f seconds"
                    (float-time
-                     (time-subtract after-init-time before-init-time)))
+                    (time-subtract after-init-time before-init-time)))
            gcs-done))
 
 (add-hook 'emacs-startup-hook #'efs/display-startup-time)
@@ -72,7 +43,7 @@
 (unless package-archive-contents
   (package-refresh-contents))
 
-  ;; Initialize use-package on non-Linux platforms
+;; Initialize use-package on non-Linux platforms
 (unless (package-installed-p 'use-package)
   (package-install 'use-package))
 
@@ -93,17 +64,17 @@
 (use-package ivy
   :diminish
   :bind (:map ivy-minibuffer-map
-         ("TAB" . ivy-alt-done)
-         ("C-l" . ivy-alt-done)
-         ("C-n" . ivy-next-line)
-         ("C-p" . ivy-previous-line)
-         :map ivy-switch-buffer-map
-         ("C-p" . ivy-previous-line)
-         ("C-l" . ivy-done)
-         ("C-d" . ivy-switch-buffer-kill)
-         :map ivy-reverse-i-search-map
-         ("C-p" . ivy-previous-line)
-         ("C-d" . ivy-reverse-i-search-kill))
+              ("TAB" . ivy-alt-done)
+              ("C-l" . ivy-alt-done)
+              ("C-n" . ivy-next-line)
+              ("C-p" . ivy-previous-line)
+              :map ivy-switch-buffer-map
+              ("C-p" . ivy-previous-line)
+              ("C-l" . ivy-done)
+              ("C-d" . ivy-switch-buffer-kill)
+              :map ivy-reverse-i-search-map
+              ("C-p" . ivy-previous-line)
+              ("C-d" . ivy-reverse-i-search-kill))
   :config
   (ivy-mode 1))
 
@@ -125,6 +96,11 @@
   (which-key-mode)
   (setq which-key-idle-delay 1))
 
+(use-package ivy-rich
+  :after ivy
+  :init
+  (ivy-rich-mode 1))
+
 (use-package counsel
   :bind (("C-M-j" . 'counsel-switch-buffer)
          :map minibuffer-local-map
@@ -133,11 +109,6 @@
   (counsel-linux-app-format-function #'counsel-linux-app-format-function-name-only)
   :config
   (counsel-mode 1))
-
-(use-package ivy-rich
-  :after ivy
-  :init
-  (ivy-rich-mode 1))
 
 (use-package go-mode
   :init)
@@ -148,6 +119,9 @@
 (defun efs/lsp-mode-setup ()
   (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
   (lsp-headerline-breadcrumb-mode))
+
+(use-package yasnippet
+  :init)
 
 (use-package lsp-mode
   :commands (lsp lsp-deferred)
@@ -188,16 +162,19 @@
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
-(use-package eglot
-  :init
-  :config
-  (add-to-list 'eglot-server-programs '((c++-mode c-mode) "clangd")))
+;; (use-package eglot
+;;   :init
+;;   :config
+;;   (add-to-list 'eglot-server-programs '((c++-mode c-mode) "clangd")))
 
 (use-package tree-sitter
   :init)
 
 (use-package company-box
   :hook (company-mode . company-box-mode))
+
+(use-package ef-themes
+  :init)
 
 (defun jart-sudo (&optional path)
   "Reopen PATH (or current file) with root privileges."
@@ -313,6 +290,9 @@ Thanks: Stefan Monnier <foo@acm.org>"
   :mode "\\.go\\'"
   :hook (go-mode . lsp-deferred))
 
+(use-package disaster
+  :init)
+
 (global-set-key (kbd "C-s") 'isearch-forward-regexp)
 (global-set-key (kbd "M-Q") 'jart-unfill-paragraph)
 (global-set-key (kbd "C-x M-m") 'shell)
@@ -335,21 +315,48 @@ Thanks: Stefan Monnier <foo@acm.org>"
 (global-set-key (kbd "C-<f9>") 'gud-down)
 (global-set-key (kbd "<f10>") 'compile)
 (global-set-key (kbd "C-<f10>") 'gdb)
-(global-set-key (kbd "C-c n") 'jart-cleanup-buffer)
+(global-set-key (kbd "C-c n") 'jart-note)
 (global-set-key (kbd "C-x M-f") 'ido-find-file-other-window)
 (global-set-key (kbd "C-M-<tab>") 'clang-format-region)
 (global-set-key (kbd "C-c <tab>") 'clang-format-buffer)
 (global-set-key (kbd "C-c f") 'flyspell-buffer)
 (global-set-key (kbd "C-c a") 'jart-save-word)
+(global-set-key (kbd "C-c d") 'disaster)
+(global-set-key (kbd "C-'") 'dabbrev-expand)
+(global-set-key (kbd "C-c o") 'ff-find-other-file)
+;; Move thru' windows.
+(global-set-key (kbd "M-S-<left>") 'windmove-left)
+(global-set-key (kbd "M-S-<right>") 'windmove-right)
+(global-set-key (kbd "M-S-<up>") 'windmove-up)
+(global-set-key (kbd "M-S-<down>") 'windmove-down)
+;; Show lines of code.
+(global-set-key (kbd "<f12>") 'global-display-line-numbers-mode)
 
-(add-to-list 'load-path (concat dotfiles-dir "lisp"))
-(add-to-list 'custom-theme-load-path (concat dotfiles-dir "themes"))
+;; Nasty trick to handle namespace indent.
+(defconst my-namespaces
+  '("cc-mode"
+    (c-offsets-alist . ((innamespace . [0])))))
 
-(load-theme 'justine256 t)
+(c-add-style "my-namespaces" my-namespaces)
 
-(prefer-coding-system 'utf-8)
-(set-terminal-coding-system 'utf-8)
-(set-keyboard-coding-system 'utf-8)
+;; Misc.
+(defalias 'yes-or-no-p 'y-or-n-p)
+(setq inhibit-startup-screen t) ; Disable splash screen.
+(scroll-bar-mode -1)        ; Disable visible scrollbar
+(tool-bar-mode -1)          ; Disable the toolbar
+(tooltip-mode -1)           ; Disable tooltips
+(set-fringe-mode 10)        ; Give some breathing room
+(menu-bar-mode -1)          ; Disable the menu bar
+(auto-compression-mode t)
+(auto-fill-mode 1)
+(delete-selection-mode 1)
+(global-font-lock-mode t)
+(ido-mode t)
+(recentf-mode 1)
+(show-paren-mode 1)
+(global-subword-mode t)
+(setq make-backup-files nil)
+
 
 (setq-default
  c-basic-offset 2
@@ -359,21 +366,10 @@ Thanks: Stefan Monnier <foo@acm.org>"
  tab-width 2
  truncate-lines t)
 
-(defconst my-namespaces
-  '("cc-mode"
-    (c-offsets-alist . ((innamespace . [0])))))
-
-(c-add-style "my-namespaces" my-namespaces)
-
-(defalias 'yes-or-no-p 'y-or-n-p)
-
-(auto-compression-mode t)
-(auto-fill-mode 1)
-(delete-selection-mode 1)
-(global-font-lock-mode t)
-(ido-mode t)
-(recentf-mode 1)
-(show-paren-mode 1)
+;; UTF-8
+(prefer-coding-system 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Performance Enhancements
@@ -390,14 +386,31 @@ Thanks: Stefan Monnier <foo@acm.org>"
   (server-start))
 
 (custom-set-variables
- '(c-basic-offset 2 t)
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(c-basic-offset 2)
+ '(column-number-mode t)
+ '(custom-enabled-themes '(ef-autumn))
  '(custom-safe-themes
-   '("c0e8a59eb7d603ca4af5616b2c61b8be2fee031760af4d8c80fd2f21229ce462" default))
+   '("ff1607d931035f2496e58566ee567b44a0f10be2f3f55d8e2956af16a2431d94" "6fad1050fbe7ee0b4bca65d33078d279a96f64c0df3286b36ce45fe4803847f2" "f1a116f53d9e685023ebf435c80a2fecf11a1ecc54bb0d540bda1f5e2ae0ae58" "c0e8a59eb7d603ca4af5616b2c61b8be2fee031760af4d8c80fd2f21229ce462" default))
  '(fill-column 72)
+ '(gdb-enable-debug t)
  '(gdb-many-windows t)
+ '(gdb-restore-window-configuration-after-quit t)
+ '(global-display-line-numbers-mode t)
+ '(lsp-enable-snippet nil)
+ '(menu-bar-mode nil)
  '(package-selected-packages
-   '(go-mode clang-format company-box company magit counsel-projectile projectile hydra counsel ivy-rich which-key rainbow-delimiters doom-themes all-the-icons doom-modeline swiper auto-package-update ivy use-package))
- '(tab-width 2))
-(custom-set-faces)
+   '(yasnippet ef-themes disaster go-mode clang-format company-box company magit counsel-projectile projectile hydra counsel ivy-rich which-key rainbow-delimiters doom-themes all-the-icons doom-modeline swiper auto-package-update ivy use-package))
+ '(tab-width 2)
+ '(tool-bar-mode nil))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:family "Iosevka Comfy Fixed" :foundry "UKWN" :slant normal :weight normal :height 143 :width normal)))))
 (put 'scroll-left 'disabled nil)
 (put 'upcase-region 'disabled nil)
