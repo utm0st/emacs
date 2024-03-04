@@ -112,6 +112,22 @@
 
 (setq revert-without-query '("TAGS"))
 
+(setq xref-show-xrefs-function #'xref-show-definitions-buffer)
+
+(setq-default
+ indent-tabs-mode nil
+ tab-width 4
+ c-basic-offset 4
+ c-file-style nil)
+
+(defun my-glsl-mode-hook ()
+  "Custom hook for GLSL mode to set the tab width."
+  (setq-default c-basic-offset 4)   ; Set the basic indentation offset for GLSL (which is based on C mode).
+  (setq-default tab-width 4)        ; Set visual display of tabs to 4 spaces
+  (setq-default indent-tabs-mode nil)) ; Use spaces instead of tabs
+
+(add-hook 'glsl-mode-hook 'my-glsl-mode-hook)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -124,7 +140,12 @@
  '(initial-scratch-message
    ";; There's no tomorrow. It's now or never. Be true to yourself or die.\12\12")
  '(package-selected-packages
-   '(ef-themes vterm projectile org-bullets move-text ivy glsl-mode company auto-package-update)))
+   '(ef-themes vterm projectile org-bullets move-text ivy glsl-mode company auto-package-update))
+ '(xref-auto-jump-to-first-definition t)
+ '(xref-auto-jump-to-first-xref t)
+ '(xref-prompt-for-identifier
+   '(not xref-find-definitions xref-find-definitions-other-window xref-find-definitions-other-frame))
+ '(xref-show-definitions-function 'xref-show-definitions-completing-read))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
