@@ -1,3 +1,3 @@
-# My emacs config.
+# emacs config.
 
-Thanks to David Wilson for their awesome repository that helped me so much: https://github.com/daviwil/emacs-from-scratch.
+Thanks to David Wilson for his awesome repository: https://github.com/daviwil/emacs-from-scratch.
