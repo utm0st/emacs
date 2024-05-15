@@ -17,8 +17,6 @@
   :config
   (auto-package-update-maybe)
   (auto-package-update-at-time "09:00"))
-(use-package ido
-  :init)
 (use-package projectile
   :diminish projectile-mode
   :config (projectile-mode)
