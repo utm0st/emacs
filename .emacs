@@ -1,6 +1,15 @@
-(require 'package)
+;;;
+;; Für Menschen wie mich kommen Chancen nur einmal im Blauen Mond vorbei.
+;; Ich bin der Abfall der Gesellschaft und wenn ich mein Leben nicht für jede
+;; Chance rischiere, die ich bekomme, werde ich zu nichts.
+;; -------------------------------------
+;; Daher ist Mut meine einzige Hoffnung.
+;;
+;;;
 
-(server-start)
+(setq initial-scratch-message ";; Ihre einzige Hoffnung beginnt hier.\n")
+
+(require 'package)
 
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
                          ("org" . "https://orgmode.org/elpa/")
@@ -87,7 +96,6 @@
 (global-set-key (kbd "C-<tab>") 'projectile-find-other-file)
 (global-set-key (kbd "C-'") 'dabbrev-expand)
 (global-set-key (kbd "C-c f") 'projectile-find-file)
-(global-set-key (kbd "<f8>") 'compile)
 (global-set-key (kbd "C-c r") 'revert-buffer)
 (global-set-key (kbd "C-c 2") 'duplicate-line)
 (global-set-key (kbd "C-c c") 'comment-region)
@@ -109,6 +117,7 @@
 (global-hl-todo-mode)
 (which-key-mode 1)
 
+(setq inhibit-startup-message t)
 (powerline-default-theme)
 
 (setq hl-todo-keyword-faces
@@ -116,24 +125,30 @@
         ("FIXME"  . "#FF0000")
         ("XXX"    . "#FFA500")
         ("KLUDGE" . "#FFFF00")
-	("NOTE"   . "#1cc23f")
-	))
+	      ("NOTE"   . "#1cc23f")
+	      ))
 
 (with-eval-after-load 'hl-todo
   (define-key hl-todo-mode-map (kbd "C-x t p") 'hl-todo-previous)
   (define-key hl-todo-mode-map (kbd "C-x t n") 'hl-todo-next))
 
-(defconst my-cc-style
-  '("my-cc-mode"
-    (c-offsets-alist . ((innamespace . [0]))) ; no extra indentation inside namespaces
-    (c-basic-offset . 2))) ; set base indentation level to 2 spaces
+(setq-default
+ c-file-style nil
+ coffee-tab-width 2
+ css-indent-offset 2
+ fill-column 72
+ indent-tabs-mode nil
+ save-place t
+ tab-width 2
+ truncate-lines t)
 
-(c-add-style "my-cc-mode" my-cc-style)
+(c-add-style "my-cpp-style" '((c-basic-offset . 2)
+                              (c-offsets-alist (access-label . 0)
+                                               (label . +)
+                                               (innamespace . 0)
+                                               )))
 
-(defun my-c++-setup ()
-  (c-set-style "my-cc-mode"))
-
-(add-hook 'c++-mode-hook 'my-c++-setup)
+(add-hook 'c++-mode-hook 'my-c++-style)
 
 (dolist (pkg '(lsp-mode company helm-lsp flycheck lsp-ui lsp-treemacs))
   (unless (package-installed-p pkg)
@@ -146,8 +161,8 @@
 
 (add-hook 'before-save-hook 'my-delete-trailing-whitespace)
 
-(setq mouse-wheel-progressive-speed nil) ; Set to t for progressive speed
-(setq mouse-wheel-follow-mouse 't) ; Scroll window under mouse pointer
+(setq mouse-wheel-progressive-speed nil) ; set to t for progressive speed
+(setq mouse-wheel-follow-mouse 't) ; scroll window under mouse pointer
 
 (require 'lsp-mode)
 
@@ -165,7 +180,7 @@
 (require 'flycheck)
 (global-flycheck-mode)
 
-(setq read-process-output-max (* 1024 1024)) ;; 1mb
+(setq read-process-output-max (* 1024 1024))
 (setq lsp-idle-delay 0.500)
 
 (custom-set-variables
@@ -173,7 +188,9 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes '(modus-vivendi))
+ '(custom-enabled-themes '(ef-duo-dark))
+ '(custom-safe-themes
+   '("263e3a9286c7ab0c4f57f5d537033c8a5943e69d142e747723181ab9b12a5855" "546862540e7b7d758a64b328bf3ceec7ae98dd87d80551496b45485ec26e05e5" "063095cf0fe6ed3990546ec77e5d3798a1e2ad5043350063467a71c69518bb24" "515ebca406da3e759f073bf2e4c8a88f8e8979ad0fdaba65ebde2edafc3f928c" "c42587b19ee1c9aa1a9dd1d8ace37ece24ca2a322243035cd6ba07f44fb466db" "6b839977baf10a65d9d7aed6076712aa2c97145f45abfa3bad1de9d85bc62a0e" default))
  '(package-selected-packages
    '(ef-themes powerline which-key hl-todo cmake-mode helm glsl-mode company move-text ivy projectile auto-package-update))
  '(tool-bar-mode nil))
